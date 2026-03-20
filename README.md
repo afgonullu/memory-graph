@@ -145,21 +145,31 @@ Custom types work fine — the taxonomy is a guide, not a constraint.
 
 ## Installation
 
-### As an Agent Skill
-
-If you're using [OpenClaw](https://github.com/openclaw/openclaw) or a similar agent framework:
+### Via skills.sh (works with Claude Code, Cursor, Windsurf, and others)
 
 ```bash
-# Install the skill
-clawhub install memory-graph
+npx skills add afgonullu/memory-graph
+```
 
-# Or manually copy to your skills directory
-cp -r ~/projects/memory-graph ~/.agents/skills/memory-graph
+Then ask your agent to use the memory-graph skill. On first use, it will set up the scaffolding automatically.
+
+### Via ClawHub (OpenClaw)
+
+```bash
+clawhub install agent-memory-graph
+```
+
+### Manual
+
+```bash
+git clone https://github.com/afgonullu/memory-graph.git ~/.agents/skills/memory-graph
 ```
 
 ### Setup
 
 Requires **Node.js 22+** (uses built-in `node:sqlite`). No `npm install` needed.
+
+After installing the skill, the setup is straightforward:
 
 ```bash
 # 1. Create the memory directory structure
