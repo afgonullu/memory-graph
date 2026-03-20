@@ -67,16 +67,16 @@ Relations are **one-directional in source, bidirectional in index** — write on
 
 All scripts are zero-dependency Node.js 22+ (uses built-in `node:sqlite`).
 
-| Script | What it does |
-|--------|-------------|
-| **query.js** | Search, browse, filter the graph (`--search`, `--node`, `--tag`, `--type`, `--stats`, `--stale`) |
-| **briefing.js** | Generate a context briefing for agents — full node + relations + recent activity (`--node`, `--topic`) |
-| **rebuild-indexes.js** | Build/rebuild SQLite index from graph files (`--incremental`, `--with-backfill`) |
+| Script                  | What it does                                                                                                                                                     |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **query.js**            | Search, browse, filter the graph (`--search`, `--node`, `--tag`, `--type`, `--stats`, `--stale`)                                                                 |
+| **briefing.js**         | Generate a context briefing for agents — full node + relations + recent activity (`--node`, `--topic`)                                                           |
+| **rebuild-indexes.js**  | Build/rebuild SQLite index from graph files (`--incremental`, `--with-backfill`)                                                                                 |
 | **suggest-backfill.js** | Discover missing connections via tag overlap, FTS, log co-references, and optional [QMD](https://github.com/tobi/qmd) semantic search (`--scope`, `--min-score`) |
-| **lint.js** | Validate graph health — missing fields, broken relations, orphan nodes, type consistency (`--fix`) |
-| **visualize.js** | Generate an interactive D3.js force-directed graph visualization |
-| **commit.js** | Auto-commit changes with descriptive messages (`--message`) |
-| **promote.js** | Find recurring log topics that deserve their own node (`--min`, `--days`) |
+| **lint.js**             | Validate graph health — missing fields, broken relations, orphan nodes, type consistency (`--fix`)                                                               |
+| **visualize.js**        | Generate an interactive D3.js force-directed graph visualization                                                                                                 |
+| **commit.js**           | Auto-commit changes with descriptive messages (`--message`)                                                                                                      |
+| **promote.js**          | Find recurring log topics that deserve their own node (`--min`, `--days`)                                                                                        |
 
 ### Examples
 
@@ -87,7 +87,7 @@ node ~/memory/scripts/query.js --search "typescript"
 # Get a full briefing for an agent
 node ~/memory/scripts/briefing.js --node projects/my-app
 
-# Find stale nodes (not updated in 90+ days)  
+# Find stale nodes (not updated in 90+ days)
 node ~/memory/scripts/query.js --stale 90
 
 # Validate the graph
@@ -108,7 +108,8 @@ node ~/memory/scripts/commit.js
 
 ### Context Assembly (briefing.js)
 
-Agents don't need raw data — they need *context*. The briefing script assembles:
+Agents don't need raw data — they need _context_. The briefing script assembles:
+
 - Target node's full content
 - All directly related nodes (1 hop) with key fields
 - 2nd-hop relations (titles only)
@@ -120,6 +121,7 @@ One command gives an agent everything it needs to be useful.
 ### Retroactive Association (suggest-backfill.js)
 
 The most human thing about memory: new information activates old connections. The backfill system:
+
 1. Finds candidates via shared tags, FTS keyword overlap, and log co-references
 2. Optionally uses [QMD](https://github.com/tobi/qmd) for semantic similarity search
 3. Scores and ranks suggestions by confidence
@@ -133,13 +135,13 @@ Nodes track `created` and `updated` dates. The `--stale` flag surfaces nodes tha
 
 Suggested standard types (enforced as info-level lint hints, not errors):
 
-| Category | Types |
-|----------|-------|
-| Structural | `uses`, `built-with`, `part-of`, `contains` |
-| Ownership | `creator`, `owner`, `maintainer` |
+| Category   | Types                                                                             |
+| ---------- | --------------------------------------------------------------------------------- |
+| Structural | `uses`, `built-with`, `part-of`, `contains`                                       |
+| Ownership  | `creator`, `owner`, `maintainer`                                                  |
 | Conceptual | `related-to`, `inspired-by`, `alternative-to`, `core-concept-of`, `core-value-of` |
-| Temporal | `led-to`, `preceded-by`, `evolved-into` |
-| Contextual | `home-of`, `lives-in`, `works-at` |
+| Temporal   | `led-to`, `preceded-by`, `evolved-into`                                           |
+| Contextual | `home-of`, `lives-in`, `works-at`                                                 |
 
 Custom types work fine — the taxonomy is a guide, not a constraint.
 
@@ -153,43 +155,6 @@ npx skills add afgonullu/memory-graph
 
 Then ask your agent to use the memory-graph skill. On first use, it will set up the scaffolding automatically.
 
-### Via ClawHub (OpenClaw)
-
-```bash
-clawhub install agent-memory-graph
-```
-
-### Manual
-
-```bash
-git clone https://github.com/afgonullu/memory-graph.git ~/.agents/skills/memory-graph
-```
-
-### Setup
-
-Requires **Node.js 22+** (uses built-in `node:sqlite`). No `npm install` needed.
-
-After installing the skill, the setup is straightforward:
-
-```bash
-# 1. Create the memory directory structure
-mkdir -p ~/memory/{graph/{people,projects,concepts,places,tools},log,indexes,backfill,scripts}
-
-# 2. Symlink scripts from the installed skill
-SKILL_DIR=~/.agents/skills/memory-graph  # adjust if installed elsewhere
-for f in "$SKILL_DIR"/scripts/*.js; do
-  ln -sf "$f" ~/memory/scripts/"$(basename "$f")"
-done
-
-# 3. Build indexes
-node ~/memory/scripts/rebuild-indexes.js
-
-# 4. (Optional) Initialize git for version history
-cd ~/memory && git init
-echo -e "indexes/\nbackfill/suggestions.md" > .gitignore
-git add . && git commit -m "initial memory graph"
-```
-
 See [references/setup.md](references/setup.md) for the full setup guide including seed nodes, templates, and agent integration.
 
 ## Templates
@@ -197,7 +162,7 @@ See [references/setup.md](references/setup.md) for the full setup guide includin
 The `templates/` directory has starter files for common node types:
 
 - `person.md` — people
-- `project.md` — projects  
+- `project.md` — projects
 - `tool.md` — tools and services
 - `concept.md` — ideas and concepts
 - `place.md` — locations
@@ -216,12 +181,12 @@ Copy, fill in, and place in the appropriate `graph/` subdirectory.
 
 The file-per-node design works at any scale. What evolves is the tooling:
 
-| Scale | What works |
-|-------|-----------|
-| 0–50K nodes | SQLite + FTS5, incremental rebuilds, scoped backfill |
-| 5K+ per category | Nested subcategories (no code changes needed) |
-| 10K+ nodes | QMD semantic search for smarter backfill |
-| 50K+ nodes | Archive layer for inactive nodes and old logs |
+| Scale            | What works                                           |
+| ---------------- | ---------------------------------------------------- |
+| 0–50K nodes      | SQLite + FTS5, incremental rebuilds, scoped backfill |
+| 5K+ per category | Nested subcategories (no code changes needed)        |
+| 10K+ nodes       | QMD semantic search for smarter backfill             |
+| 50K+ nodes       | Archive layer for inactive nodes and old logs        |
 
 The design invariant: **markdown files are always the source of truth.** Everything else is derived, rebuildable, disposable.
 
