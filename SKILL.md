@@ -175,7 +175,7 @@ node ~/memory/scripts/query.js --stats
 4. Scan existing nodes for potential relations (shared tags, mentions)
 5. Add discovered relations with `type: suggested` if uncertain
 6. Log the creation in today's activity log if it is significant
-7. Rebuild indexes once at the end of the current memory batch: `node ~/memory/scripts/rebuild-indexes.js --incremental`
+7. Defer index rebuilding to the daily end-of-day maintenance pass: `node ~/memory/scripts/rebuild-indexes.js --incremental`
 8. If QMD is installed, refresh semantic search only when immediate semantic freshness matters: `qmd update && qmd embed`
 
 ### 3. Update a Node
@@ -185,7 +185,7 @@ node ~/memory/scripts/query.js --stats
 3. Update the `updated` field to today's date
 4. Add entry to `## Changelog` section if significant
 5. Log the update if it represents durable, significant context
-6. Rebuild indexes once at the end of the current memory batch: `node ~/memory/scripts/rebuild-indexes.js --incremental`
+6. Defer index rebuilding to the daily end-of-day maintenance pass: `node ~/memory/scripts/rebuild-indexes.js --incremental`
 
 ### 4. Log Activity
 
@@ -197,7 +197,7 @@ Append to `~/memory/log/YYYY-MM-DD.md` (create if needed):
 
 `{ref: ...}` references are backfill signals — they hint at connections between nodes.
 
-Log one concise entry for significant completed work or durable decisions. Do not log every small edit, command, test run, UI tweak, or transient investigation. If several memory-worthy events happen in one session, batch the log entries and rebuild indexes once only if the new log entries need to be searchable immediately.
+Log one concise entry for significant completed work or durable decisions. Do not log every small edit, command, test run, UI tweak, or transient investigation. If several memory-worthy events happen in one session, batch the log entries and leave index rebuilding for daily end-of-day maintenance unless the new log entries need to be searchable immediately.
 
 ### 5. Backfill (Discover Missing Connections)
 
@@ -273,4 +273,4 @@ Create a folder under `graph/`. No config changes. Indexes adapt on rebuild.
 11. **Keep the body useful.** Frontmatter is for machines. The markdown body is for humans.
 12. **Set `updated` on changes.** Keep the `updated` field current for temporal tracking.
 13. **Use standard relation types.** Prefer the taxonomy above. Run `lint.js` to check.
-14. **Batch index rebuilds.** Rebuild after graph node changes or meaningful log batches that should be searchable immediately; do not rebuild after every memory edit.
+14. **Rebuild indexes once daily.** Defer normal index rebuilding to the end-of-day maintenance pass after memory activity; rebuild during a task only when fresh indexed search or backfill is explicitly needed.
