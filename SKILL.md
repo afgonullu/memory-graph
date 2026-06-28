@@ -1,6 +1,6 @@
 ---
 name: memory-graph
-description: Agent-agnostic personal knowledge graph stored as markdown files with YAML frontmatter. Use when persistent context materially improves the work: the user's life, projects, tools, people, concepts, decisions, handoffs, or explicit memory requests. Also use when logging significant completed work, creating or updating durable knowledge nodes, discovering connections between existing nodes (backfill), or rebuilding indexes. Triggers include "remember this", "what do I know about X", substantial project work needing prior context, creating/updating knowledge entries, and periodic memory maintenance. Do not use for self-contained questions, small local edits, or tasks where repository context is sufficient.
+description: Agent-agnostic personal knowledge graph stored as markdown files with YAML frontmatter. Use when persistent context materially improves the work: the user's life, projects, tools, people, concepts, decisions, handoffs, or explicit memory requests. Also use when logging high-impact completed milestones, creating or updating durable knowledge nodes, discovering connections between existing nodes (backfill), or rebuilding indexes. Triggers include "remember this", "what do I know about X", substantial project work needing prior context, creating/updating knowledge entries, and periodic memory maintenance. Do not use for self-contained questions, small local edits, routine session logging, or tasks where repository context is sufficient.
 ---
 
 # Memory Graph
@@ -174,7 +174,7 @@ node ~/memory/scripts/query.js --stats
 3. Fill in frontmatter + body (set `created` and `updated` to today)
 4. Scan existing nodes for potential relations (shared tags, mentions)
 5. Add discovered relations with `type: suggested` if uncertain
-6. Log the creation in today's activity log if it is significant
+6. Log the creation only if it is a high-impact milestone or useful handoff; the node itself is usually the durable record
 7. Defer index rebuilding to the daily end-of-day maintenance pass: `node ~/memory/scripts/rebuild-indexes.js --incremental`
 8. If QMD is installed, refresh semantic search only when immediate semantic freshness matters: `qmd update && qmd embed`
 
@@ -184,7 +184,7 @@ node ~/memory/scripts/query.js --stats
 2. Update frontmatter and/or body
 3. Update the `updated` field to today's date
 4. Add entry to `## Changelog` section if significant
-5. Log the update if it represents durable, significant context
+5. Log the update only if it changes a durable decision, creates an important handoff, or marks a major completed milestone
 6. Defer index rebuilding to the daily end-of-day maintenance pass: `node ~/memory/scripts/rebuild-indexes.js --incremental`
 
 ### 4. Log Activity
@@ -197,12 +197,16 @@ Append to `~/memory/log/YYYY-MM-DD.md` (create if needed):
 
 `{ref: ...}` references are backfill signals — they hint at connections between nodes.
 
-Log one concise entry for significant completed work or durable decisions. Do not log every small edit, command, test run, UI tweak, or transient investigation. If several memory-worthy events happen in one session, batch the log entries and leave index rebuilding for daily end-of-day maintenance unless the new log entries need to be searchable immediately.
+Default to no log entry. Write a log only when it would materially help a future agent resume work or understand a durable decision.
+
+Good log entries are sparse, high-signal rollups: major shipped milestones, durable decisions, important unresolved blockers, handoffs, or explicit "remember this" requests. Prefer at most one rollup per project per day.
+
+Do not log routine agent sessions, small edits, command/test runs, minor UI tweaks, repetitive unit-by-unit progress, or transient investigations. For repetitive workflows, summarize the batch or day instead of logging each unit. Leave index rebuilding for daily end-of-day maintenance unless the new log entries need to be searchable immediately.
 
 ### 5. Backfill (Discover Missing Connections)
 
 ```bash
-# Rebuild indexes first (if not recently done)
+# Backfill needs current indexes; rebuild only as part of maintenance or when explicitly doing backfill
 node ~/memory/scripts/rebuild-indexes.js --incremental
 
 # Generate suggestions (scoped — uses tags, FTS, log co-refs, + QMD semantic)
@@ -261,7 +265,7 @@ Create a folder under `graph/`. No config changes. Indexes adapt on rebuild.
 ## Rules
 
 1. **Read before writing.** Check if a node exists before creating a duplicate.
-2. **Log significant work.** Append to `log/YYYY-MM-DD.md` when you do something significant.
+2. **Log rarely.** Default to no log; append high-impact rollups only when they would materially help future sessions.
 3. **Use refs in logs.** If your work touches existing concepts/projects, add `{ref: ...}`.
 4. **Scan for connections.** When creating a node, check for related nodes (shared tags, mentions).
 5. **Never edit `indexes/`.** Run the rebuild script instead.
