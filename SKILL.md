@@ -1,6 +1,6 @@
 ---
 name: memory-graph
-description: Agent-agnostic personal knowledge graph stored as markdown files with YAML frontmatter. Use when you need persistent context about the user's life, projects, tools, people, concepts, or decisions — especially across agent resets or switches. Also use when logging significant activity, searching for context before starting work, creating knowledge nodes for new topics, discovering connections between existing nodes (backfill), or rebuilding indexes. Triggers include needing user context, logging work, "remember this", "what do I know about X", creating/updating knowledge entries, and periodic memory maintenance.
+description: Agent-agnostic personal knowledge graph stored as markdown files with YAML frontmatter. Use when persistent context materially improves the work: the user's life, projects, tools, people, concepts, decisions, handoffs, or explicit memory requests. Also use when logging significant completed work, creating or updating durable knowledge nodes, discovering connections between existing nodes (backfill), or rebuilding indexes. Triggers include "remember this", "what do I know about X", substantial project work needing prior context, creating/updating knowledge entries, and periodic memory maintenance. Do not use for self-contained questions, small local edits, or tasks where repository context is sufficient.
 ---
 
 # Memory Graph
@@ -117,7 +117,16 @@ Use these as starting points when creating new nodes. Copy and edit — don't mo
 
 ## Operations
 
-### 1. Read for Context (Session Start)
+### 1. Read for Context (Targeted)
+
+Use memory context when prior context matters. For self-contained questions, small edits, or tasks where local repository context is enough, skip memory lookup.
+
+For substantial sessions, do one focused lookup before making assumptions:
+
+- use a node briefing when you know the project/person/tool/concept
+- use a topic briefing or structural search when the relevant node is unknown
+- check recent logs only when recent activity is likely to affect the task
+- avoid broad scans unless the task genuinely needs them
 
 ```bash
 # Check recent activity
@@ -165,9 +174,9 @@ node ~/memory/scripts/query.js --stats
 3. Fill in frontmatter + body (set `created` and `updated` to today)
 4. Scan existing nodes for potential relations (shared tags, mentions)
 5. Add discovered relations with `type: suggested` if uncertain
-6. Log the creation in today's activity log
-7. Rebuild indexes: `node ~/memory/scripts/rebuild-indexes.js --incremental`
-8. If QMD is installed: `qmd update && qmd embed` (refreshes semantic search)
+6. Log the creation in today's activity log if it is significant
+7. Rebuild indexes once at the end of the current memory batch: `node ~/memory/scripts/rebuild-indexes.js --incremental`
+8. If QMD is installed, refresh semantic search only when immediate semantic freshness matters: `qmd update && qmd embed`
 
 ### 3. Update a Node
 
@@ -175,8 +184,8 @@ node ~/memory/scripts/query.js --stats
 2. Update frontmatter and/or body
 3. Update the `updated` field to today's date
 4. Add entry to `## Changelog` section if significant
-5. Log the update
-6. Rebuild indexes: `node ~/memory/scripts/rebuild-indexes.js --incremental`
+5. Log the update if it represents durable, significant context
+6. Rebuild indexes once at the end of the current memory batch: `node ~/memory/scripts/rebuild-indexes.js --incremental`
 
 ### 4. Log Activity
 
@@ -187,6 +196,8 @@ Append to `~/memory/log/YYYY-MM-DD.md` (create if needed):
 ```
 
 `{ref: ...}` references are backfill signals — they hint at connections between nodes.
+
+Log one concise entry for significant completed work or durable decisions. Do not log every small edit, command, test run, UI tweak, or transient investigation. If several memory-worthy events happen in one session, batch the log entries and rebuild indexes once only if the new log entries need to be searchable immediately.
 
 ### 5. Backfill (Discover Missing Connections)
 
@@ -262,3 +273,4 @@ Create a folder under `graph/`. No config changes. Indexes adapt on rebuild.
 11. **Keep the body useful.** Frontmatter is for machines. The markdown body is for humans.
 12. **Set `updated` on changes.** Keep the `updated` field current for temporal tracking.
 13. **Use standard relation types.** Prefer the taxonomy above. Run `lint.js` to check.
+14. **Batch index rebuilds.** Rebuild after graph node changes or meaningful log batches that should be searchable immediately; do not rebuild after every memory edit.
